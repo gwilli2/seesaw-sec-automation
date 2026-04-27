@@ -63,3 +63,22 @@ resource "aws_lambda_permission" "allow_cloudwatch" {
   principal     = "events.amazonaws.com"
   source_arn    = aws_cloudwatch_event_rule.s3_change_sensor.arn
 }
+
+# This block tells Terraform to zip up your Python script
+data "archive_file" "lambda_zip" {
+  type        = "zip"
+  source_file = "${path.module}/../scripts/guardian.py"
+  output_path = "${path.module}/guardian.zip"
+}
+
+# This block creates the actual Lambda function in AWS
+resource "aws_lambda_function" "s3_guardian" {
+  filename         = data.archive_file.lambda_zip.output_path
+  function_name    = "s3_guardian"
+  role             = aws_iam_role.guardian_role.arn
+  handler          = "guardian.lambda_handler" # This must match your filename and function name
+  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
+  runtime          = "python3.12"
+
+  depends_on = [aws_iam_role_policy.guardian_policy]
+}

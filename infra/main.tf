@@ -82,3 +82,23 @@ resource "aws_lambda_function" "s3_guardian" {
 
   depends_on = [aws_iam_role_policy.guardian_policy]
 }
+
+# 1. Create a bucket to store the logs (CloudTrail requirement)
+resource "aws_s3_bucket" "cloudtrail_logs" {
+  bucket        = "gregory-trail-logs-unique-id" # Change to a unique name
+  force_destroy = true
+}
+
+# 2. Create the Trail to monitor the S3 bucket
+resource "aws_cloudtrail" "s3_monitor" {
+  name                          = "s3-management-events"
+  s3_bucket_name                = aws_s3_bucket.cloudtrail_logs.id
+  include_global_service_events = true
+  is_multi_region_trail         = false
+  enable_log_file_validation    = true
+
+  event_selector {
+    read_write_type           = "WriteOnly"
+    include_management_events = true
+  }
+}

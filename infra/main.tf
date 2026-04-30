@@ -4,12 +4,12 @@ provider "aws" {
 
 # 1. Create the S3 Bucket we want to protect
 resource "aws_s3_bucket" "secure_storage" {
-  bucket = "gregory-secure-data-lab-001" # Must be unique
+  bucket = "gregory-secure-data-lab-001-latest" # Must be unique
 }
 
 # 2. Create the IAM Role for our Python Lambda
 resource "aws_iam_role" "guardian_role" {
-  name = "S3GuardianRole"
+  name = "S3GuardianRole-latest"
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
@@ -85,7 +85,7 @@ resource "aws_lambda_function" "s3_guardian" {
 
 # 1. Create a bucket to store the logs (CloudTrail requirement)
 resource "aws_s3_bucket" "cloudtrail_logs" {
-  bucket        = "gregory-trail-logs-unique-id" # Change to a unique name
+  bucket        = "gregory-trail-logs-unique-id-latest" # Change to a unique name
   force_destroy = true
 }
 
